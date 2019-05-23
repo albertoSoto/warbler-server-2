@@ -2,8 +2,10 @@ package com.trao1011.warbler.server;
 
 import java.io.IOException;
 
+import com.trao1011.warbler.database.DataUtilities;
 import com.trao1011.warbler.database.MediaDatabase;
 import com.trao1011.warbler.database.MediaDatabaseWatcher;
+import me.tongfei.progressbar.*;
 
 public class WarblerServer {
 	public static void main(String[] args) {
@@ -26,7 +28,16 @@ public class WarblerServer {
 			System.exit(1);
 		}
 		
-		MediaDatabase.getInstance().scan(cfg.getMediaPath());
+		int numFiles = DataUtilities.countFilesUnder(cfg.getMediaPath().toFile());
+		try (ProgressBar pb = new ProgressBar(
+				"Reading media...", 
+				numFiles, 
+				250, // ms update interval
+				System.err,
+				ProgressBarStyle.ASCII,
+				"", 1)) {
+			MediaDatabase.getInstance().scan(cfg.getMediaPath(), pb);
+		}
 		try {
 			new Thread(new MediaDatabaseWatcher(cfg.getMediaPath())).start();
 		} catch (IOException e) {

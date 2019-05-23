@@ -63,4 +63,15 @@ public class DataUtilities {
 		
 		return bytesToHex(digest.digest());
 	}
+
+	public static int countFilesUnder(final File prefix) {
+		int count = 0;
+		for (File f : prefix.listFiles()) {
+			if (f.isFile())
+				count++;
+			else if (f.isDirectory())
+				count += countFilesUnder(f);
+		}
+		return count;
+	}
 }

@@ -13,6 +13,7 @@ dependencies {
 	implementation 'io.vertx:vertx-core:3.7.0'
 	implementation 'io.vertx:vertx-jdbc-client:3.7.0'
 	implementation 'io.vertx:vertx-web:3.7.0'
+	implementation 'me.tongfei:progressbar:0.7.4'
 	implementation 'net.harawata:appdirs:1.0.3'
     implementation 'org.tomlj:tomlj:1.0.0'
     

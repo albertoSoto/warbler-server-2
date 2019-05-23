@@ -9,6 +9,8 @@ import java.util.stream.*;
 
 import com.trao1011.warbler.database.AudioTag.Attribute;
 
+import me.tongfei.progressbar.ProgressBar;
+
 public class MediaDatabase {
 	private Map<String, MediaDatabaseEntry> index = new HashMap<String, MediaDatabaseEntry>();
 	private Map<String, String> nameKeyCache = new HashMap<String, String>();
@@ -32,20 +34,30 @@ public class MediaDatabase {
 	}
 	
 	public void scan(final Path media) {
-		if (media.toFile().getName().startsWith("."))
+		scan(media, null);
+	}
+	
+	public void scan(final Path media, ProgressBar pb) {
+		if (media.toFile().getName().startsWith(".")) {
+			if (pb != null)
+				pb.step();
 			return;
+		}
 		
 		if (media.toFile().isDirectory()) {
 			try (Stream<Path> paths = Files.walk(media)) {
 				paths.filter(Files::isRegularFile)
-					.forEach(this::scan);
+					.forEach(f -> scan(f, pb));
 			} catch (IOException e) { e.printStackTrace(); }
 			return;
 		}
 		
 		AudioTag atag = AudioTag.read(media.toFile());
-		if (atag == null)
+		if (atag == null) {
+			if (pb != null)
+				pb.step();
 			return;
+		}
 		
 		String trackUUID, albumUUID;
 		List<String> artistUUIDs, albumArtistUUIDs;
@@ -59,7 +71,7 @@ public class MediaDatabase {
 			albumUUID = atag.get(Attribute.MUSICBRAINZ_RELEASE_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
 		else
 			albumUUID = DataUtilities.SHA256(atag.get(Attribute.ALBUM) + atag.get(Attribute.ALBUM_ARTIST))
-							.substring(4, 4 + 32);
+							.substring(4, 4 + 36);
 		
 		if (atag.containsKey(Attribute.MUSICBRAINZ_ARTIST_ID))
 			artistUUIDs = Arrays.stream(atag.get(Attribute.MUSICBRAINZ_ARTIST_ID).toLowerCase().split(",|;|/"))
@@ -69,7 +81,7 @@ public class MediaDatabase {
 		else
 			artistUUIDs = Arrays.stream(atag.get(Attribute.ARTISTS, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
+					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 36))
 					.collect(Collectors.toList());
 		
 		if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_ARTIST_ID))
@@ -80,7 +92,7 @@ public class MediaDatabase {
 		else
 			albumArtistUUIDs = Arrays.stream(atag.get(Attribute.ALBUM_ARTIST, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
+					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 36))
 					.collect(Collectors.toList());
 		
 		Track t = (Track) index.get(trackUUID);
@@ -104,7 +116,7 @@ public class MediaDatabase {
 			index.put(albumUUID, a);
 		}
 		a.coverart = findBestCoverart(media.getParent());
-		a.name = atag.get(Attribute.ALBUM);
+		a.title = atag.get(Attribute.ALBUM);
 		a.artistRepr = atag.get(Attribute.ALBUM_ARTIST);
 		a.uuid = albumUUID;
 		a.setDate(atag.get(Attribute.DATE));
@@ -137,6 +149,9 @@ public class MediaDatabase {
 			a.albumArtists.add(r);
 			r.albums.add(a);
 		}
+
+		if (pb != null)
+			pb.step();
 	}
 	
 	public void remove(final Path media) {

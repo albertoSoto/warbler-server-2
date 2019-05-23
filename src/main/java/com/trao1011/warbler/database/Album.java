@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class Album extends MediaDatabaseEntry implements Comparable<Album> {
-	String name, artistRepr;
+	String title, artistRepr;
 	Path coverart;
 	int[] date = new int[3];
 	List<Artist> albumArtists = new ArrayList<Artist>();
@@ -28,7 +28,7 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 	public boolean equals(Object o) {
 		if (o instanceof Album) {
 			Album other = (Album) o;
-			return name.equals(other.name) && artistRepr.equals(other.artistRepr);
+			return title.equals(other.title) && artistRepr.equals(other.artistRepr);
 		} else
 			return false;
 	}
@@ -40,7 +40,7 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 	
 	@Override
 	public String toString() {
-		return String.format("Album[%s by %s]", name, artistRepr);
+		return String.format("Album[%s by %s]", title, artistRepr);
 	}
 
 	@Override
@@ -53,6 +53,6 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 				return date[i] - o.date[i];
 		}
 		
-		return name.compareToIgnoreCase(o.name);
+		return title.compareToIgnoreCase(o.title);
 	}
 }
