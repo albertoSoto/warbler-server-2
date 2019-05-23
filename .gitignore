@@ -1,0 +1,6 @@
+/.gradle
+/build
+/bin
+/config.toml
+/.project
+/.settings

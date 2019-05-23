@@ -1,0 +1,58 @@
+package com.trao1011.warbler.database;
+
+import java.nio.file.Path;
+import java.util.*;
+
+public class Album extends MediaDatabaseEntry implements Comparable<Album> {
+	String name, artistRepr;
+	Path coverart;
+	int[] date = new int[3];
+	List<Artist> albumArtists = new ArrayList<Artist>();
+	SortedSet<Track> tracks = new TreeSet<Track>();
+	
+	void setDate(String date) {
+		if (date == null)
+			return;
+		
+		String[] components = date.split("-");
+		try {
+			for (int i = 0; i < 3; i++)
+				this.date[i] = Integer.parseInt(components[i]);
+		} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+			for (int i = 0; i < 3; i++)
+				this.date[i] = 0;
+		}
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Album) {
+			Album other = (Album) o;
+			return name.equals(other.name) && artistRepr.equals(other.artistRepr);
+		} else
+			return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("Album[%s by %s]", name, artistRepr);
+	}
+
+	@Override
+	public int compareTo(Album o) {
+		if (artistRepr.compareTo(o.artistRepr) != 0)
+			return artistRepr.compareTo(o.artistRepr);
+		
+		for (int i = 0; i < 3; i++) {
+			if (date[i] != o.date[i])
+				return date[i] - o.date[i];
+		}
+		
+		return name.compareToIgnoreCase(o.name);
+	}
+}

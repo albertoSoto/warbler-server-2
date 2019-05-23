@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+	implementation 'com.h2database:h2:1.4.199'
+	implementation 'io.vertx:vertx-auth-jdbc:3.7.0'
+	implementation 'io.vertx:vertx-core:3.7.0'
+	implementation 'io.vertx:vertx-jdbc-client:3.7.0'
+	implementation 'io.vertx:vertx-web:3.7.0'
+	implementation 'net.harawata:appdirs:1.0.3'
+    implementation 'org.tomlj:tomlj:1.0.0'
+    
+    implementation 'de.sciss:jump3r:1.0.5'
+    implementation 'javazoom:jlayer:1.0.1'
+    implementation 'net.sourceforge.jaadec:jaad:0.8.5'
+    implementation 'org:jaudiotagger:2.0.3'
+    implementation 'org.jcraft:jorbis:0.0.17'
+    implementation 'org.jflac:jflac-codec:1.5.2'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+mainClassName = 'com.trao1011.warbler.server.WarblerServer'
