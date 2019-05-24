@@ -29,8 +29,17 @@ public class MediaDatabase {
 		nameKeyCache.clear();
 	}
 	
+	Map<String, MediaDatabaseEntry> getIndex() {
+		return index;
+	}
+	
 	public MediaDatabaseEntry get(String uuid) {
-		return null;
+		return index.get(uuid);
+	}
+	
+	public MediaDatabaseEntry get(String uuid, Class<?> type) {
+		MediaDatabaseEntry e = index.get(uuid);
+		return type.isInstance(e) ? e : null;
 	}
 	
 	public void scan(final Path media) {
