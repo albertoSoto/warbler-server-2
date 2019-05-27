@@ -1,0 +1,85 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+    tracks: [Track!]!
+    albums: [Album!]!
+    artists: [Artist!]!
+    playlists: [Playlist!]!
+    entities: [String!]!
+
+    track(id: ID!): Track
+    album(id: ID!): Album
+    artist(id: ID!): Artist
+    playlist(id: Int!): Playlist
+
+    currentUser: User
+    user(id: Int!): User
+}
+
+type MutationType {
+	createUser(username: String!, password: String!, accesslevel: Int!, displayname: String) : User
+	setUserPassword(uid: Int!, currentPassword: String!, newPassword: String!) : User
+	setUserAccess(uid: Int!, accesslevel: Int!) : User
+	setUserName(uid: Int!, displayname: String) : User
+	setUserPrefs(uid: Int!, prefs: String!) : User
+	removeUser(uid: Int!) : Boolean!
+	
+	createPlaylist(name: String!, authorID: Int!) : Playlist
+	setPlaylistName(id: Int!, name: String!) : Playlist
+	setPlaylistShared(id: Int!, shared: Boolean!) : Playlist
+	setPlaylistTracks(id: Int!, trackIDs: [String!]!) : Playlist
+	removePlaylist(id: Int!) : Boolean!
+	
+	# setTrackTitle(id: ID!, title: String!) : Track
+	# setTrackNumber(id: ID!, disc: Int, track: Int) : Track
+	# setTrackAlbum(id: ID!, album: String!, identified: Boolean!) : Track
+	# setTrackArtists(id: ID!, artists: [String!]!, identified: [Boolean!]!) : Track
+}
+
+type Track {
+    id: ID!
+    title: String!
+    track: Int
+    disc: Int
+    duration: Int!
+    bitrate: Int
+    album: Album!
+    artists: [Artist!]!
+}
+
+type Album {
+    id: ID!
+    title: String!
+    year: Int!
+    month: Int
+    day: Int
+    artists: [Artist!]!
+    tracks: [Track!]!
+}
+
+type Artist {
+    id: ID!
+    name: String!
+    tracks: [Track!]!
+    albums: [Album!]!
+}
+
+type User {
+    id: Int!
+    username: String!
+    displayname: String!
+    accesslevel: Int
+    prefs: String
+    playlists: [Playlist!]!
+}
+
+type Playlist {
+    id: Int!
+    name: String!
+    author: User!
+    shared: Boolean!
+    tracks: [Track!]!
+}

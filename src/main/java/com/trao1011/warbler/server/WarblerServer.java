@@ -5,8 +5,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.trao1011.warbler.database.DataUtilities;
+import com.trao1011.warbler.database.GraphDB;
 import com.trao1011.warbler.database.MediaDatabase;
 import com.trao1011.warbler.database.MediaDatabaseWatcher;
+import com.trao1011.warbler.database.UserDatabase;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -14,6 +16,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CookieHandler;
 import io.vertx.ext.web.handler.SessionHandler;
+import io.vertx.ext.web.handler.graphql.GraphQLHandler;
+import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
+import io.vertx.ext.web.handler.graphql.GraphiQLOptions;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import me.tongfei.progressbar.*;
 
@@ -65,7 +70,13 @@ public class WarblerServer {
 				.setSessionTimeout(1000L * 60 * 60 * 24 * 7));
 		router.route().handler(BodyHandler.create().setBodyLimit(2 << 16));
 		
-		router.post("/gql").handler(GraphAPI.graphqlHandler);
+		router.post("/login").handler(IdentityAPI.loginHandler);
+		router.get("/logout").handler(IdentityAPI.logoutHandler);
+		
+		GraphQLHandlerOptions options = new GraphQLHandlerOptions()
+				.setGraphiQLOptions(new GraphiQLOptions().setEnabled(true));
+		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql(), options));
+		
 		router.route().handler(ctx -> ctx.response().setStatusCode(404).end());
 		
 		return router;
@@ -89,6 +100,7 @@ public class WarblerServer {
 			System.err.println("Could not create a file watcher for the media directory.");
 			System.exit(1);
 		}
+		UserDatabase.getInstance();
 		
 		HttpServer server = vertx.createHttpServer();
 		Router httpRouter = createRouter();

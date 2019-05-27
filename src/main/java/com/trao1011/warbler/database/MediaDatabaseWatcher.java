@@ -41,6 +41,16 @@ public class MediaDatabaseWatcher implements Runnable {
 				if (evt.kind() == StandardWatchEventKinds.ENTRY_MODIFY && target.toFile().isDirectory())
 					continue;
 				System.out.println(evt.kind() + " on " + target);
+				
+				if (evt.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+					if (target.toFile().isFile())
+						MediaDatabase.getInstance().scan(target);
+				} else if (evt.kind() == StandardWatchEventKinds.ENTRY_DELETE)
+					MediaDatabase.getInstance().remove(target);
+				else if (evt.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+					if (target.toFile().isFile())
+						MediaDatabase.getInstance().rescan(target);
+				}
 			}
 			
 			key.reset();
