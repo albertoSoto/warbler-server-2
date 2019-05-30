@@ -1,24 +1,19 @@
 package com.trao1011.warbler.server;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.trao1011.warbler.database.DataUtilities;
-import com.trao1011.warbler.database.GraphDB;
-import com.trao1011.warbler.database.MediaDatabase;
-import com.trao1011.warbler.database.MediaDatabaseWatcher;
-import com.trao1011.warbler.database.UserDatabase;
+import com.trao1011.warbler.database.*;
+import com.trao1011.warbler.transcoder.*;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.CookieHandler;
-import io.vertx.ext.web.handler.SessionHandler;
-import io.vertx.ext.web.handler.graphql.GraphQLHandler;
-import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
-import io.vertx.ext.web.handler.graphql.GraphiQLOptions;
+import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.handler.graphql.*;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import me.tongfei.progressbar.*;
 
@@ -96,7 +91,7 @@ public class WarblerServer {
 		}
 		try {
 			new Thread(new MediaDatabaseWatcher(cfg.getMediaPath())).start();
-		} catch (IOException e) {
+		} catch (java.io.IOException e) {
 			System.err.println("Could not create a file watcher for the media directory.");
 			System.exit(1);
 		}
@@ -112,5 +107,26 @@ public class WarblerServer {
 				System.exit(1);
 			}
 		});
+	}
+	
+	public static void transcode(java.io.File f, java.io.File nf) {
+		Transcoder t = null;
+		try {
+			t = new MP3Transcoder(vertx, f, 0);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		MessageConsumer<Buffer> reader = vertx.eventBus().consumer(t.getHandleName());
+		reader.handler(new TranscoderReader(reader, nf, null));
+		Thread tcThread = new Thread(t);
+		tcThread.start();
+		try {
+			tcThread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.exit(0);
 	}
 }
