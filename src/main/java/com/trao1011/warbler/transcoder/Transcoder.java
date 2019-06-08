@@ -70,10 +70,22 @@ public abstract class Transcoder implements Runnable {
 	/**
 	 * Should be called before the thread exits.
 	 */
-	public void finish() {
+	protected void finish() {
 		int footerLength = encodeFinish(encBuffer);
 		emitBytes(encBuffer, footerLength);
 		eventBus.publish(handleName, null);
 		encoder.close();
+	}
+	
+	public static final Transcoder create(io.vertx.core.Vertx vertx, File input, int outputQuality) 
+			throws FileNotFoundException {
+		if (input.getName().endsWith(".mp3"))
+			return new MP3Transcoder(vertx, input, outputQuality);
+		else if (input.getName().endsWith(".ogg"))
+			return new VorbisTranscoder(vertx, input, outputQuality);
+		else if (input.getName().endsWith(".flac"))
+			return new FLACTranscoder(vertx, input, outputQuality);
+		else
+			throw new UnsupportedOperationException();
 	}
 }

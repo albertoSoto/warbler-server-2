@@ -65,8 +65,10 @@ public class WarblerServer {
 				.setSessionTimeout(1000L * 60 * 60 * 24 * 7));
 		router.route().handler(BodyHandler.create().setBodyLimit(2 << 16));
 		
-		router.post("/login").handler(IdentityAPI.loginHandler);
-		router.get("/logout").handler(IdentityAPI.logoutHandler);
+		router.post("/login").handler(Identity.loginHandler);
+		router.get("/logout").handler(Identity.logoutHandler);
+		
+		router.get("/isstream/:id").handler(Streaming.streamAudio);
 		
 		GraphQLHandlerOptions options = new GraphQLHandlerOptions()
 				.setGraphiQLOptions(new GraphiQLOptions().setEnabled(true));

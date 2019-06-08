@@ -9,7 +9,7 @@ import com.trao1011.warbler.database.UserDatabase;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 
-public class IdentityAPI {
+public class Identity {
 	public static Handler<RoutingContext>
 	
 	loginHandler = ctx -> {
