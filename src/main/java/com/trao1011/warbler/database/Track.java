@@ -9,16 +9,16 @@ public class Track extends MediaDatabaseEntry implements Comparable<Track> {
 	int track, disc, duration, bitrate;
 	Album album;
 	List<Artist> artists;
-	
+
 	public Track(Path location) {
 		this.location = location;
 		this.artists = new ArrayList<Artist>();
 	}
-	
+
 	public Path getLocation() {
 		return location;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Track && ((Track) obj).location.equals(location);

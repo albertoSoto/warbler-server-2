@@ -6,11 +6,11 @@ public class Artist extends MediaDatabaseEntry implements Comparable<Artist> {
 	String name;
 	SortedSet<Track> tracks = new TreeSet<Track>();
 	SortedSet<Album> albums = new TreeSet<Album>();
-	
+
 	public Artist(String name) {
 		this.name = name;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Artist && ((Artist)obj).name.equals(name);

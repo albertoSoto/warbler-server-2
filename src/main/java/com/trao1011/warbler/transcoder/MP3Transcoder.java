@@ -10,7 +10,7 @@ import io.vertx.core.Vertx;
 import javazoom.jl.decoder.*;
 
 public class MP3Transcoder extends CustomTranscoder {
-	
+
 	public MP3Transcoder(Vertx vertx, File input, int outputQuality) throws FileNotFoundException {
 		super(vertx, input, outputQuality);
 		if (!input.getName().endsWith(".mp3"))
@@ -45,7 +45,7 @@ class MP3Decoder {
 		bitstream = new Bitstream(fis);
 		decoder = new Decoder();
 	}
-	
+
 	public void setPCMConsumer(PCMConsumer consumer) {
 		this.consumer = consumer;
 	}
@@ -59,25 +59,25 @@ class MP3Decoder {
 				moreFrames = false;
 			}
 		}
-		
+
 		try { bitstream.close(); } catch (BitstreamException e) { }
 	}
-	
+
 	private boolean decodeFrame() throws JavaLayerException {
 		Header h = bitstream.readFrame();
 		if (h == null)
 			return false;
-		
+
 		SampleBuffer output = (SampleBuffer) decoder.decodeFrame(h, bitstream);
 		synchronized (this) {
 			if (consumer != null) {
 				if (sentFormat == false) {
-					AudioFormat afmt = new AudioFormat(decoder.getOutputFrequency(), 16, 
+					AudioFormat afmt = new AudioFormat(decoder.getOutputFrequency(), 16,
 							decoder.getOutputChannels(), true, Transcoder.bigEndian);
 					consumer.onAudioFormat(afmt);
 					sentFormat = true;
 				}
-				
+
 				ByteBuffer buffer = ByteBuffer.allocate(output.getBufferLength() * 2);
 				buffer.order(ByteOrder.nativeOrder());
 				buffer.asShortBuffer().put(output.getBuffer());

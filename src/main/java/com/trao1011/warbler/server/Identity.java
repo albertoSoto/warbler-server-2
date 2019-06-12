@@ -11,7 +11,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class Identity {
 	public static Handler<RoutingContext>
-	
+
 	loginHandler = ctx -> {
 		String username = "", password = "";
 		String[] pairs = ctx.getBodyAsString().split("\\&");
@@ -34,23 +34,23 @@ public class Identity {
 			else if (name.equals("p"))
 				password = value;
 		}
-		
+
 		UserDatabase.getInstance().login(username, password).thenAccept(user -> {
 			if (user != null)
 				ctx.session().put("wbuser", user);
 			ctx.response().setStatusCode(user == null ? 404 : 200).end();
 		});
 	},
-	
+
 	logoutHandler = ctx -> {
 		ctx.session().destroy();
 		ctx.response().setStatusCode(200).end();
 	};
-	
+
 	public static boolean isAuthorized(RoutingContext ctx) {
 		return isAuthorized(ctx, 0);
 	}
-	
+
 	public static boolean isAuthorized(RoutingContext ctx, int accessLevel) {
 		User currentUser = ctx.session().get("wbuser");
 		if (currentUser == null)

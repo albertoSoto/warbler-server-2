@@ -26,7 +26,7 @@ public abstract class CustomTranscoder extends Transcoder implements PCMConsumer
 	public void onData(byte[] data, int length) {
 		int bytesToTransfer = Math.min(length, getPCMBufferSize());
 		int bytesWritten, currentOffset = 0;
-		
+
 		while (0 < (bytesWritten = encodeBuffer(data, currentOffset, bytesToTransfer, encBuffer))) {
 			currentOffset += bytesToTransfer;
 			bytesToTransfer = Math.min(encBuffer.length, length - currentOffset);

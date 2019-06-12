@@ -31,22 +31,22 @@ public class GraphDB {
 	public GraphQL ql() {
 		return gql;
 	}
-	
+
 	private static User currentUser(DataFetchingEnvironment env) {
 		RoutingContextImpl s = env.getContext();
 		return s.session().get("wbuser");
 	}
-	
+
 	private static boolean currentUserAuthorized(DataFetchingEnvironment env, int accessLevel) {
 		// return currentUser(env).accessLevel >= accessLevel;
 		return true;
 	}
-	
+
 	private static boolean currentUserOwnsPlaylist(DataFetchingEnvironment env) {
 		return UserDatabase.getInstance().playlists.get(env.getArgument("id")).author == currentUser(env) ||
 				currentUserAuthorized(env, 3); // god mode
 	}
-	
+
 	private static final java.util.function.UnaryOperator<TypeRuntimeWiring.Builder>
 	queryBuilder = builder -> builder
 			.dataFetcher("tracks", env -> MediaDatabase.getInstance().getIndex()
@@ -74,18 +74,18 @@ public class GraphDB {
 			.dataFetcher("user", env -> UserDatabase.getInstance()
 					.users.get(((Number) env.getArgument("id")).longValue()))
 			.dataFetcher("currentUser", env -> currentUser(env)),
-	
+
 	mutationBuilder = builder -> builder
 			.dataFetcher("createUser", env -> {
 				System.out.print("X");
 				if (currentUserAuthorized(env, 3)) {
-						return UserDatabase.getInstance().createUser(env.getArgument("username"), 
+						return UserDatabase.getInstance().createUser(env.getArgument("username"),
 								env.getArgument("password"),
-								env.getArgument("accesslevel"), 
+								env.getArgument("accesslevel"),
 								env.getArgument("displayname"));
 				} else return null;
 			})
-			.dataFetcher("setUserPassword", env -> currentUser(env).uid == (Long) env.getArgument("uid") ? 
+			.dataFetcher("setUserPassword", env -> currentUser(env).uid == (Long) env.getArgument("uid") ?
 					UserDatabase.getInstance().setUserPassword(((Number) env.getArgument("uid")).longValue(),
 							env.getArgument("currentPassword"),
 							env.getArgument("newPassword")) : null)
@@ -113,17 +113,17 @@ public class GraphDB {
 			})
 			.dataFetcher("removeUser", env -> currentUserAuthorized(env, 3) ?
 					UserDatabase.getInstance().removeUser(((Number) env.getArgument("uid")).longValue()) : false)
-			
-			.dataFetcher("createPlaylist", env -> currentUserAuthorized(env, 1) ? 
+
+			.dataFetcher("createPlaylist", env -> currentUserAuthorized(env, 1) ?
 					UserDatabase.getInstance().createPlaylist(env.getArgument("name"), currentUser(env)) : null)
-			.dataFetcher("setPlaylistName", env -> currentUserOwnsPlaylist(env) ? 
-					UserDatabase.getInstance().setPlaylistName(((Number) env.getArgument("id")).longValue(), 
+			.dataFetcher("setPlaylistName", env -> currentUserOwnsPlaylist(env) ?
+					UserDatabase.getInstance().setPlaylistName(((Number) env.getArgument("id")).longValue(),
 							env.getArgument("name")) : null)
-			.dataFetcher("setPlaylistShared", env -> currentUserOwnsPlaylist(env) ? 
-					UserDatabase.getInstance().setPlaylistShared(((Number) env.getArgument("id")).longValue(), 
+			.dataFetcher("setPlaylistShared", env -> currentUserOwnsPlaylist(env) ?
+					UserDatabase.getInstance().setPlaylistShared(((Number) env.getArgument("id")).longValue(),
 							env.getArgument("shared")) : null)
-			.dataFetcher("setPlaylistTracks", env -> currentUserOwnsPlaylist(env) ? 
-					UserDatabase.getInstance().setPlaylistTracks(((Number) env.getArgument("id")).longValue(), 
+			.dataFetcher("setPlaylistTracks", env -> currentUserOwnsPlaylist(env) ?
+					UserDatabase.getInstance().setPlaylistTracks(((Number) env.getArgument("id")).longValue(),
 							env.getArgument("shared")) : null)
 			.dataFetcher("removePlaylist", env -> currentUserOwnsPlaylist(env) ?
 					UserDatabase.getInstance().removePlaylist(((Number) env.getArgument("id")).longValue()) : false);
@@ -163,7 +163,7 @@ public class GraphDB {
 				.type("User", builder -> builder
 						.dataFetcher("id", env -> ((User) env.getSource()).uid)
 						.dataFetcher("username", env -> ((User) env.getSource()).username)
-						.dataFetcher("displayname", env -> ((User) env.getSource()).displayName())						
+						.dataFetcher("displayname", env -> ((User) env.getSource()).displayName())
 						.dataFetcher("playlists", env -> {
 							User current = currentUser(env), target = env.getSource();
 							return target.playlists.stream()
@@ -172,8 +172,8 @@ public class GraphDB {
 						})
 						.dataFetcher("accesslevel", env -> {
 							User target = env.getSource();
-							return target == currentUser(env) || currentUserAuthorized(env, 3) ? 
-									target.accessLevel : 
+							return target == currentUser(env) || currentUserAuthorized(env, 3) ?
+									target.accessLevel :
 									null;
 						})
 						.dataFetcher("prefs", env -> {

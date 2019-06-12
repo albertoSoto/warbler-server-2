@@ -26,12 +26,12 @@ public class UserDatabase {
 	private static JsonObject jdbcConfig = new JsonObject();
 	private static UserDatabase udb;
 	static {
-		
+
 		initialAdmin.accessLevel = 5;
 		initialAdmin.name = "Setup";
 		initialAdmin.uid = -1;
 		initialAdmin.username = "warbleradmin";
-		
+
 		Path pathToDB = Paths.get(WarblerServer.getAppDataFolder(), "users");
 		jdbcConfig.put("driver_class", "org.h2.Driver")
 				.put("url", "jdbc:h2:" + pathToDB.normalize().toAbsolutePath().toString())
@@ -52,7 +52,7 @@ public class UserDatabase {
 	Map<Long, Playlist> playlists = new HashMap<Long, Playlist>();
 	Map<Long, User> users = new HashMap<Long, User>();
 	SQLClient client;
-	
+
 	public UserDatabase() throws SQLException, ClassNotFoundException {
 		Class.forName(jdbcConfig.getString("driver_class"));
 		client = JDBCClient.createShared(WarblerServer.vertx, jdbcConfig);
@@ -121,7 +121,7 @@ public class UserDatabase {
 			return null;
 		}
 	}
-	
+
 	public CompletableFuture<User> login(String username, String password) {
 		CompletableFuture<User> promise = new CompletableFuture<User>();
 		if (users.isEmpty() && username.equals(initialAdmin.username))
@@ -131,7 +131,7 @@ public class UserDatabase {
 			JsonArray params = new JsonArray();
 			params.add(username);
 			params.add(crypt(password));
-			
+
 			client.queryWithParams(sql, params, res -> {
 				if (res.succeeded()) {
 					ResultSet rs = res.result();
@@ -143,9 +143,9 @@ public class UserDatabase {
 					promise.completeExceptionally(res.cause());
 			});
 		}
-		return promise;	
+		return promise;
 	}
-	
+
 	CompletableFuture<User> createUser(String username, String password, int accesslevel, String fullname) {
 		String sql = "INSERT INTO `USERS` (`USERNAME`, `PASSWORD`, `ACCESSLEVEL`, `FULLNAME`) "
 				+ "VALUES (?, ?, ?, ?)";
@@ -169,7 +169,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<User> setUserPassword(long uid, String currentPassword, String newPassword) {
 		String sql = "UPDATE `USERS` SET `PASSWORD` = ? WHERE `ID` = ? AND `PASSWORD` = ?";
 		JsonArray params = new JsonArray();
@@ -188,7 +188,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<User> setUserAccess(long uid, int accessLevel) {
 		String sql = "UPDATE `USERS` SET `ACCESSLEVEL` = ? WHERE `ID` = ?";
 		JsonArray params = new JsonArray();
@@ -208,7 +208,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<User> setUserName(long uid, String displayName) {
 		String sql = "UPDATE `USERS` SET `FULLNAME` = ? WHERE UID = ?";
 		JsonArray params = new JsonArray();
@@ -228,7 +228,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<User> setUserPrefs(long uid, String jsonPrefs) {
 		String sql = "UPDATE `USERS` SET PREFS = ? WHERE UID = ?";
 		JsonObject prefs = new JsonObject(jsonPrefs);
@@ -249,7 +249,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<Boolean> removeUser(long uid) {
 		String sql = "DELETE FROM `USERS` WHERE `ID` = ?";
 		JsonArray params = new JsonArray();
@@ -264,7 +264,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<Playlist> createPlaylist(String name, User author) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
 		if (author == null) {
@@ -288,7 +288,7 @@ public class UserDatabase {
 		}
 		return promise;
 	}
-	
+
 	CompletableFuture<Playlist> setPlaylistName(long id, String name) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
 		String sql = "UPDATE `PLAYLISTS` SET `NAME` = ? WHERE `ID` = ?";
@@ -308,7 +308,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<Playlist> setPlaylistShared(long id, boolean shared) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
 		String sql = "UPDATE `PLAYLISTS` SET `SHARED` = ? WHERE `ID` = ?";
@@ -328,7 +328,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<Playlist> setPlaylistTracks(long id, String tracks) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
 		String sql = "UPDATE `PLAYLISTS` SET `TRACKS` = ? WHERE `ID` = ?";
@@ -351,7 +351,7 @@ public class UserDatabase {
 		});
 		return promise;
 	}
-	
+
 	CompletableFuture<Boolean> removePlaylist(long id) {
 		CompletableFuture<Boolean> promise = new CompletableFuture<Boolean>();
 		String sql = "DELETE FROM `PLAYLISTS` WHERE `ID` = ?";

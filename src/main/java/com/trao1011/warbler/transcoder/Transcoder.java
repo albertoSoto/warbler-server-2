@@ -24,7 +24,7 @@ public abstract class Transcoder implements Runnable {
 		this.outputQuality = outputQuality;
 		if (!input.isFile())
 			throw new FileNotFoundException(input.getAbsolutePath());
-		
+
 		Random rnd = new Random();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 64; i++) {
@@ -35,38 +35,38 @@ public abstract class Transcoder implements Runnable {
 		eventBus = vertx.eventBus();
 		encoder = null;
 	}
-	
+
 	public String getHandleName() {
 		return handleName;
 	}
-	
+
 	public int getOutputQuality() {
 		return outputQuality;
 	}
-	
+
 	protected LameEncoder createEncoder(AudioFormat intermediateFormat) {
 		encoder = new LameEncoder(intermediateFormat, LameEncoder.BITRATE_AUTO,
 				LameEncoder.CHANNEL_MODE_JOINT_STEREO, outputQuality, true);
 		encBuffer = new byte[encoder.getPCMBufferSize()];
 		return encoder;
 	}
-	
+
 	protected int getPCMBufferSize() {
 		return encoder.getPCMBufferSize();
 	}
-	
+
 	protected int encodeBuffer(byte[] pcm, int offset, int length, byte[] encoded) {
 		return encoder.encodeBuffer(pcm, offset, length, encoded);
 	}
-	
+
 	protected int encodeFinish(byte[] encoded) {
 		return encoder.encodeFinish(encoded);
 	}
-	
+
 	protected void emitBytes(byte[] bytes, int length) {
 		eventBus.publish(handleName, Buffer.buffer(bytes).getBuffer(0, length));
 	}
-	
+
 	/**
 	 * Should be called before the thread exits.
 	 */
@@ -76,8 +76,8 @@ public abstract class Transcoder implements Runnable {
 		eventBus.publish(handleName, null);
 		encoder.close();
 	}
-	
-	public static final Transcoder create(io.vertx.core.Vertx vertx, File input, int outputQuality) 
+
+	public static final Transcoder create(io.vertx.core.Vertx vertx, File input, int outputQuality)
 			throws FileNotFoundException {
 		if (input.getName().endsWith(".mp3"))
 			return new MP3Transcoder(vertx, input, outputQuality);

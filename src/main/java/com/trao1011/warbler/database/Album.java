@@ -9,11 +9,11 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 	int[] date = new int[3];
 	Set<Artist> albumArtists = new LinkedHashSet<Artist>();
 	SortedSet<Track> tracks = new TreeSet<Track>();
-	
+
 	void setDate(String date) {
 		if (date == null)
 			return;
-		
+
 		String[] components = date.split("-");
 		try {
 			for (int i = 0; i < 3; i++)
@@ -23,7 +23,7 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 				this.date[i] = 0;
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Album) {
@@ -32,12 +32,12 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 		} else
 			return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("Album[%s by %s]", title, artistRepr);
@@ -47,12 +47,12 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 	public int compareTo(Album o) {
 		if (artistRepr.compareTo(o.artistRepr) != 0)
 			return artistRepr.compareTo(o.artistRepr);
-		
+
 		for (int i = 0; i < 3; i++) {
 			if (date[i] != o.date[i])
 				return date[i] - o.date[i];
 		}
-		
+
 		return title.compareToIgnoreCase(o.title);
 	}
 }

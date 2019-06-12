@@ -10,7 +10,7 @@ import org.jflac.util.ByteData;
 import io.vertx.core.Vertx;
 
 public class FLACTranscoder extends Transcoder implements PCMProcessor {
-	
+
 	public FLACTranscoder(Vertx vertx, File input, int outputQuality) throws FileNotFoundException {
 		super(vertx, input, outputQuality);
 		if (!input.getName().endsWith(".flac"))
@@ -45,7 +45,7 @@ public class FLACTranscoder extends Transcoder implements PCMProcessor {
 	public void processPCM(ByteData pcm) {
 		int bytesToTransfer = Math.min(pcm.getLen(), getPCMBufferSize());
 		int bytesWritten, currentOffset = 0;
-		
+
 		while (0 < (bytesWritten = encodeBuffer(pcm.getData(), currentOffset, bytesToTransfer, encBuffer))) {
 			currentOffset += bytesToTransfer;
 			bytesToTransfer = Math.min(encBuffer.length, pcm.getLen() - currentOffset);

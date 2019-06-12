@@ -29,7 +29,7 @@ public class TranscoderReader implements Handler<Message<Buffer>> {
 	public void handle(Message<Buffer> event) {
 		if (event.body() == null)
 			consumer.unregister();
-		
+
 		if (responseOpen)
 			handleWriteToStream(event);
 		if (fos != null) {

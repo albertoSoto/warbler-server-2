@@ -18,7 +18,7 @@ import io.vertx.ext.web.RoutingContext;
 
 public class Streaming {
 	public static final int DEFAULT_TRANSCODE_QUALITY = 2;
-	
+
 	// Remove files in the cache that already exist.
 	static {
 		Path transcodeFolder = Paths.get(WarblerServer.getAppDataFolder(), "transcodes");
@@ -28,9 +28,9 @@ public class Streaming {
 		} catch (IOException e) { }
 		// If it couldn't delete a file, it probably wasn't put here by us anyway.
 	}
-	
+
 	private static int determineTranscodeQuality(String value) {
-		if (value == null) 
+		if (value == null)
 			return DEFAULT_TRANSCODE_QUALITY;
 		else if (value.equals("raw"))
 			return -1;
@@ -42,7 +42,7 @@ public class Streaming {
 			}
 		}
 	}
-	
+
 	private static File getCachedTranscodeLocation(Track t, int quality) {
 		MessageDigest digest = null;
 		try {
@@ -58,17 +58,17 @@ public class Streaming {
 		String filename = Base64.getUrlEncoder().encodeToString(digest.digest());
 		return Paths.get(WarblerServer.getAppDataFolder(), "transcodes", filename + ".mp3").toFile();
 	}
-	
+
 	public static Handler<RoutingContext> streamAudio = ctx -> {
 		Track track;
 		int transcodeQuality = DEFAULT_TRANSCODE_QUALITY;
 		File transcoded;
-		
+
 		if (!Identity.isAuthorized(ctx)) {
 			ctx.response().setStatusCode(403).end("Forbidden");
 			return;
 		}
-		
+
 		if (MediaDatabase.getInstance().get(ctx.request().getParam("id"), Track.class) != null) {
 			track = (Track) MediaDatabase.getInstance().get(ctx.request().getParam("id"), Track.class);
 		} else {
@@ -90,7 +90,7 @@ public class Streaming {
 		} else {
 			transcoded.deleteOnExit();
 			ctx.response().setChunked(true);
-			
+
 			Transcoder transcoder = null;
 			try {
 				transcoder = Transcoder.create(ctx.vertx(), track.getLocation().toFile(), transcodeQuality);
@@ -105,7 +105,7 @@ public class Streaming {
 					.end("Warbler does not support streaming that type of file.");
 				return;
 			}
-			
+
 			MessageConsumer<Buffer> consumer = ctx.vertx().eventBus().consumer(transcoder.getHandleName());
 			consumer.handler(new TranscoderReader(consumer, transcoded, ctx));
 			new Thread(transcoder).start();

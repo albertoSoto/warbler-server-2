@@ -19,7 +19,7 @@ import me.tongfei.progressbar.*;
 
 public class WarblerServer {
 	public static Vertx vertx = Vertx.vertx();
-	
+
 	public static String getAppDataFolder() {
 		Path p;
 		if (System.getProperty("os.name").toLowerCase().contains("win"))
@@ -32,7 +32,7 @@ public class WarblerServer {
 		p.toFile().mkdirs();
 		return p.toString();
 	}
-	
+
 	private static Configuration getConfig() {
 		Configuration cfg = null;
 		try {
@@ -52,10 +52,10 @@ public class WarblerServer {
 			System.err.println(e.getMessage());
 			return null;
 		}
-		
+
 		return cfg;
 	}
-	
+
 	private static Router createRouter() {
 		Router router = Router.router(vertx);
 		router.route().handler(CookieHandler.create());
@@ -64,24 +64,24 @@ public class WarblerServer {
 				.setCookieHttpOnlyFlag(true)
 				.setSessionTimeout(1000L * 60 * 60 * 24 * 7));
 		router.route().handler(BodyHandler.create().setBodyLimit(2 << 16));
-		
+
 		router.post("/login").handler(Identity.loginHandler);
 		router.get("/logout").handler(Identity.logoutHandler);
-		
+
 		router.get("/isstream/:id").handler(Streaming.streamAudio);
-		
+
 		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql()));
-		
+
 		router.route().handler(ctx -> ctx.response().setStatusCode(404).end());
-		
+
 		return router;
 	}
-	
+
 	public static void main(String[] args) {
 		Configuration cfg = getConfig();
 		if (cfg == null)
 			System.exit(1);
-		
+
 		int numFiles = DataUtilities.countFilesUnder(cfg.getMediaPath().toFile());
 		try (ProgressBar pb = new ProgressBar("Reading media...", numFiles, 250,
 				System.err, ProgressBarStyle.ASCII, "", 1)) {
@@ -96,7 +96,7 @@ public class WarblerServer {
 			System.exit(1);
 		}
 		UserDatabase.getInstance();
-		
+
 		HttpServer server = vertx.createHttpServer();
 		Router httpRouter = createRouter();
 		server.requestHandler(httpRouter).listen(cfg.getServerPort(), "0.0.0.0", res -> {
@@ -108,7 +108,7 @@ public class WarblerServer {
 			}
 		});
 	}
-	
+
 	public static void transcode(java.io.File f, java.io.File nf) {
 		Transcoder t = null;
 		try {
@@ -117,7 +117,7 @@ public class WarblerServer {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		MessageConsumer<Buffer> reader = vertx.eventBus().consumer(t.getHandleName());
 		reader.handler(new TranscoderReader(reader, nf, null));
 		Thread tcThread = new Thread(t);

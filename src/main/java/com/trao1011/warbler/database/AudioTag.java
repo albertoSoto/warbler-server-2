@@ -13,7 +13,7 @@ import org.jaudiotagger.tag.id3.framebody.FrameBodyTXXX;
 
 public class AudioTag extends HashMap<AudioTag.Attribute, String> {
 	private static final long serialVersionUID = 8166116153327789558L;
-	
+
 	static {
 		Logger[] pin = new Logger[] { Logger.getLogger("org.jaudiotagger") };
 		for (Logger l : pin)
