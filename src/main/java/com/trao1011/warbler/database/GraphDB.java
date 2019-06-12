@@ -164,7 +164,12 @@ public class GraphDB {
 						.dataFetcher("id", env -> ((User) env.getSource()).uid)
 						.dataFetcher("username", env -> ((User) env.getSource()).username)
 						.dataFetcher("displayname", env -> ((User) env.getSource()).displayName())						
-						.dataFetcher("playlists", env -> ((User) env.getSource()).playlists)
+						.dataFetcher("playlists", env -> {
+							User current = currentUser(env), target = env.getSource();
+							return target.playlists.stream()
+									.filter(pl -> target == current || current.accessLevel >= 3 || pl.shared)
+									.collect(Collectors.toList());
+						})
 						.dataFetcher("accesslevel", env -> {
 							User target = env.getSource();
 							return target == currentUser(env) || currentUserAuthorized(env, 3) ? 
