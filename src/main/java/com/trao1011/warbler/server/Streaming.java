@@ -64,6 +64,11 @@ public class Streaming {
 		int transcodeQuality = DEFAULT_TRANSCODE_QUALITY;
 		File transcoded;
 		
+		if (!Identity.isAuthorized(ctx)) {
+			ctx.response().setStatusCode(403).end("Forbidden");
+			return;
+		}
+		
 		if (MediaDatabase.getInstance().get(ctx.request().getParam("id"), Track.class) != null) {
 			track = (Track) MediaDatabase.getInstance().get(ctx.request().getParam("id"), Track.class);
 		} else {
