@@ -70,9 +70,7 @@ public class WarblerServer {
 		
 		router.get("/isstream/:id").handler(Streaming.streamAudio);
 		
-		GraphQLHandlerOptions options = new GraphQLHandlerOptions()
-				.setGraphiQLOptions(new GraphiQLOptions().setEnabled(true));
-		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql(), options));
+		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql()));
 		
 		router.route().handler(ctx -> ctx.response().setStatusCode(404).end());
 		
