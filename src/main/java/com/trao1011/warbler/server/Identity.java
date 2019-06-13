@@ -45,9 +45,15 @@ public class Identity {
 	logoutHandler = ctx -> {
 		ctx.session().destroy();
 		ctx.response().setStatusCode(200).end();
+	},
+
+	loggedInHandler = ctx -> {
+		ctx.response().setStatusCode(200)
+			.putHeader("Content-type", "text/plain")
+			.end(isAuthenticated(ctx) ? "true" : "false");
 	};
 
-	public static boolean isAuthorized(RoutingContext ctx) {
+	public static boolean isAuthenticated(RoutingContext ctx) {
 		return isAuthorized(ctx, 0);
 	}
 

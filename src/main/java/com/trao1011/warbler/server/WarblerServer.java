@@ -66,6 +66,7 @@ public class WarblerServer {
 		router.route().handler(BodyHandler.create().setBodyLimit(2 << 16));
 
 		router.post("/login").handler(Identity.loginHandler);
+		router.get("/loggedIn").handler(Identity.loggedInHandler);
 		router.get("/logout").handler(Identity.logoutHandler);
 
 		router.get("/isstream/:id").handler(Streaming.streamAudio);

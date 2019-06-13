@@ -64,7 +64,7 @@ public class Streaming {
 		int transcodeQuality = DEFAULT_TRANSCODE_QUALITY;
 		File transcoded;
 
-		if (!Identity.isAuthorized(ctx)) {
+		if (!Identity.isAuthenticated(ctx)) {
 			ctx.response().setStatusCode(403).end("Forbidden");
 			return;
 		}
