@@ -16,7 +16,7 @@ public class GraphDB {
 	private static final String schemaName = "/gql_schema.sdl";
 
 	public GraphDB() {
-		InputStream is = Class.class.getResourceAsStream(schemaName);
+		InputStream is = this.getClass().getResourceAsStream(schemaName);
 		String schemaInput;
 		try (Scanner sc = new Scanner(is)) {
 			schemaInput = sc.useDelimiter("\\Z").next();

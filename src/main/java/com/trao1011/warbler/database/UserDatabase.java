@@ -58,7 +58,7 @@ public class UserDatabase {
 		client = JDBCClient.createShared(WarblerServer.vertx, jdbcConfig);
 
 		// Initialize the database.
-		InputStream is = Class.class.getResourceAsStream(schemaName);
+		InputStream is = this.getClass().getResourceAsStream(schemaName);
 		String schemaInput;
 		try (Scanner sc = new Scanner(is)) {
 			schemaInput = sc.useDelimiter("\\Z").next();
