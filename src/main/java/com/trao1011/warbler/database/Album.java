@@ -9,6 +9,10 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 	int[] date = new int[3];
 	Set<Artist> albumArtists = new LinkedHashSet<Artist>();
 	SortedSet<Track> tracks = new TreeSet<Track>();
+	
+	public Path getCoverArt() {
+		return coverart;
+	}
 
 	void setDate(String date) {
 		if (date == null)

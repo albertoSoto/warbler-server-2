@@ -69,7 +69,8 @@ public class WarblerServer {
 		router.get("/loggedIn").handler(Identity.loggedInHandler);
 		router.get("/logout").handler(Identity.logoutHandler);
 
-		router.get("/isstream/:id").handler(Streaming.streamAudio);
+		router.get("/stream/:id").handler(Streaming.streamAudio);
+		router.get("/artwork/:id").handler(Streaming.albumArtwork);
 
 		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql()));
 

@@ -6,6 +6,7 @@ import java.nio.file.*;
 import java.security.*;
 import java.util.Base64;
 
+import com.trao1011.warbler.database.Album;
 import com.trao1011.warbler.database.MediaDatabase;
 import com.trao1011.warbler.database.Track;
 import com.trao1011.warbler.transcoder.Transcoder;
@@ -58,8 +59,31 @@ public class Streaming {
 		String filename = Base64.getUrlEncoder().encodeToString(digest.digest());
 		return Paths.get(WarblerServer.getAppDataFolder(), "transcodes", filename + ".mp3").toFile();
 	}
+	
+	public static Handler<RoutingContext> albumArtwork = ctx -> {
+		Album album;
+		
+		if (!Identity.isAuthenticated(ctx)) {
+			ctx.response().setStatusCode(403).end("Forbidden");
+			return;
+		}
+		
+		if (MediaDatabase.getInstance().get(ctx.request().getParam("id"), Album.class) != null) {
+			album = (Album) MediaDatabase.getInstance().get(ctx.request().getParam("id"), Album.class);
+		} else {
+			ctx.response().setStatusCode(400).end();
+			return;
+		}
+		
+		Path coverart = album.getCoverArt();
+		if (coverart.toFile().exists()) {
+			ctx.response().setStatusCode(200).sendFile(coverart.toAbsolutePath().toString()).end();
+		} else {
+			ctx.response().setStatusCode(404).end("Not Found");
+		}
+	},
 
-	public static Handler<RoutingContext> streamAudio = ctx -> {
+	streamAudio = ctx -> {
 		Track track;
 		int transcodeQuality = DEFAULT_TRANSCODE_QUALITY;
 		File transcoded;
