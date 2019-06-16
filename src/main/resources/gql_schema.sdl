@@ -20,23 +20,23 @@ type QueryType {
 }
 
 type MutationType {
-	createUser(username: String!, password: String!, accesslevel: Int!, displayname: String) : User
-	setUserPassword(uid: Int!, currentPassword: String!, newPassword: String!) : User
-	setUserAccess(uid: Int!, accesslevel: Int!) : User
-	setUserName(uid: Int!, displayname: String) : User
-	setUserPrefs(uid: Int!, prefs: String!) : User
-	removeUser(uid: Int!) : Boolean!
+    createUser(username: String!, password: String!, accesslevel: Int!, displayname: String) : User
+    setUserPassword(uid: Int!, currentPassword: String!, newPassword: String!) : User
+    setUserAccess(uid: Int!, accesslevel: Int!) : User
+    setUserName(uid: Int!, displayname: String) : User
+    setUserPrefs(uid: Int!, prefs: String!) : User
+    removeUser(uid: Int!) : Boolean!
 	
-	createPlaylist(name: String!, authorID: Int!) : Playlist
-	setPlaylistName(id: Int!, name: String!) : Playlist
-	setPlaylistShared(id: Int!, shared: Boolean!) : Playlist
-	setPlaylistTracks(id: Int!, trackIDs: [String!]!) : Playlist
-	removePlaylist(id: Int!) : Boolean!
+    createPlaylist(name: String!, authorID: Int!) : Playlist
+    setPlaylistName(id: Int!, name: String!) : Playlist
+    setPlaylistShared(id: Int!, shared: Boolean!) : Playlist
+    setPlaylistTracks(id: Int!, trackIDs: [String!]!) : Playlist
+    removePlaylist(id: Int!) : Boolean!
 	
-	# setTrackTitle(id: ID!, title: String!) : Track
-	# setTrackNumber(id: ID!, disc: Int, track: Int) : Track
-	# setTrackAlbum(id: ID!, album: String!, identified: Boolean!) : Track
-	# setTrackArtists(id: ID!, artists: [String!]!, identified: [Boolean!]!) : Track
+    # setTrackTitle(id: ID!, title: String!) : Track
+    # setTrackNumber(id: ID!, disc: Int, track: Int) : Track
+    # setTrackAlbum(id: ID!, album: String!, identified: Boolean!) : Track
+    # setTrackArtists(id: ID!, artists: [String!]!, identified: [Boolean!]!) : Track
 }
 
 type Track {
@@ -64,6 +64,7 @@ type Artist {
     id: ID!
     name: String!
     tracks: [Track!]!
+    totalTracks: Int!
     albums: [Album!]!
 }
 

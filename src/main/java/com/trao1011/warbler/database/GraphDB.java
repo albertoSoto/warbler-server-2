@@ -153,6 +153,7 @@ public class GraphDB {
 						.dataFetcher("id", env -> ((Artist) env.getSource()).uuid)
 						.dataFetcher("name", env -> ((Artist) env.getSource()).name)
 						.dataFetcher("tracks", env -> ((Artist) env.getSource()).tracks)
+						.dataFetcher("totalTracks", env -> ((Artist) env.getSource()).tracks.size())
 						.dataFetcher("albums", env -> ((Artist) env.getSource()).albums))
 				.type("Playlist", builder -> builder
 						.dataFetcher("id", env -> ((Playlist) env.getSource()).id)
