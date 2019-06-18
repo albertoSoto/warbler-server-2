@@ -66,6 +66,7 @@ type Artist {
     tracks: [Track!]!
     totalTracks: Int!
     albums: [Album!]!
+    appearances: [Album!]!
 }
 
 type User {

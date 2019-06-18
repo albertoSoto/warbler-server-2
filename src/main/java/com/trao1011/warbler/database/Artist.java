@@ -5,7 +5,7 @@ import java.util.*;
 public class Artist extends MediaDatabaseEntry implements Comparable<Artist> {
 	String name;
 	SortedSet<Track> tracks = new TreeSet<Track>();
-	SortedSet<Album> albums = new TreeSet<Album>();
+	SortedSet<Album> albums = new TreeSet<Album>(), appearances = new TreeSet<Album>();
 
 	public Artist(String name) {
 		this.name = name;
