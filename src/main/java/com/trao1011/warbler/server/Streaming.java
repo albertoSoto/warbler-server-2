@@ -76,7 +76,7 @@ public class Streaming {
 		}
 		
 		Path coverart = album.getCoverArt();
-		if (coverart.toFile().exists()) {
+		if (coverart != null && coverart.toFile().exists()) {
 			ctx.response().setStatusCode(200).sendFile(coverart.toAbsolutePath().toString()).end();
 		} else {
 			ctx.response().setStatusCode(404).end("Not Found");

@@ -104,59 +104,60 @@ public class MediaDatabase {
 					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 36))
 					.collect(Collectors.toList());
 
-		Track t = (Track) index.get(trackUUID);
-		if (t == null) {
-			t = new Track(media);
-			index.put(trackUUID, t);
+		Track track = (Track) index.get(trackUUID);
+		if (track == null) {
+			track = new Track(media);
+			index.put(trackUUID, track);
 		}
-		t.artistRepr = atag.get(Attribute.ARTIST);
-		t.bitrate = DataUtilities.tryParseInteger(atag.get(Attribute.BITRATE), -1);
-		t.disc = DataUtilities.tryParseInteger(atag.get(Attribute.DISC_NUMBER, Attribute.TOTAL_DISCS), 0);
-		t.duration = Integer.parseInt(atag.get(Attribute.DURATION));
-		t.format = atag.get(Attribute.FORMAT);
-		t.title = atag.get(Attribute.TITLE);
-		t.track = DataUtilities.tryParseInteger(atag.get(Attribute.TRACK_NUMBER, Attribute.TOTAL_TRACKS), 0);
-		t.uuid = trackUUID;
-		t.artists.clear();
+		track.artistRepr = atag.get(Attribute.ARTIST);
+		track.bitrate = DataUtilities.tryParseInteger(atag.get(Attribute.BITRATE), -1);
+		track.disc = DataUtilities.tryParseInteger(atag.get(Attribute.DISC_NUMBER, Attribute.TOTAL_DISCS), 0);
+		track.duration = Integer.parseInt(atag.get(Attribute.DURATION));
+		track.format = atag.get(Attribute.FORMAT);
+		track.title = atag.get(Attribute.TITLE);
+		track.track = DataUtilities.tryParseInteger(atag.get(Attribute.TRACK_NUMBER, Attribute.TOTAL_TRACKS), 0);
+		track.uuid = trackUUID;
+		track.artists.clear();
 
-		Album a = (Album) index.get(albumUUID);
-		if (a == null) {
-			a = new Album();
-			index.put(albumUUID, a);
+		Album album = (Album) index.get(albumUUID);
+		if (album == null) {
+			album = new Album();
+			index.put(albumUUID, album);
 		}
-		a.coverart = findBestCoverart(media.getParent());
-		a.title = atag.get(Attribute.ALBUM);
-		a.artistRepr = atag.get(Attribute.ALBUM_ARTIST);
-		a.uuid = albumUUID;
-		a.setDate(atag.get(Attribute.DATE));
+		album.coverart = findBestCoverart(media.getParent());
+		album.title = atag.get(Attribute.ALBUM);
+		album.artistRepr = atag.get(Attribute.ALBUM_ARTIST);
+		album.uuid = albumUUID;
+		album.setDate(atag.get(Attribute.DATE));
 
-		t.album = a;
-		a.tracks.add(t);
+		track.album = album;
+		album.tracks.add(track);
 
 		String[] trackArtists = atag.get(Attribute.ARTISTS, Attribute.ARTIST).split(",|;|/"),
 				albumArtists = atag.get(Attribute.ALBUM_ARTIST, Attribute.ARTIST).split(",|;|/");
 
 		for (int i = 0; i < trackArtists.length; i++) {
-			Artist r = (Artist) index.get(artistUUIDs.get(i));
-			if (r == null) {
-				r = new Artist(trackArtists[i]);
-				index.put(artistUUIDs.get(i), r);
+			Artist trackArtist = (Artist) index.get(artistUUIDs.get(i));
+			if (trackArtist == null) {
+				trackArtist = new Artist(trackArtists[i]);
+				index.put(artistUUIDs.get(i), trackArtist);
 			} else
-				r.name = trackArtists[i];
-			r.uuid = artistUUIDs.get(i);
-			r.tracks.add(t);
-			t.artists.add(r);
+				trackArtist.name = trackArtists[i];
+			trackArtist.uuid = artistUUIDs.get(i);
+			trackArtist.tracks.add(track);
+			trackArtist.appearances.add(album);
+			track.artists.add(trackArtist);
 		}
 		for (int i = 0; i < albumArtists.length; i++) {
-			Artist r = (Artist) index.get(albumArtistUUIDs.get(i));
-			if (r == null) {
-				r = new Artist(albumArtists[i]);
-				index.put(albumArtistUUIDs.get(i), r);
+			Artist albumArtist = (Artist) index.get(albumArtistUUIDs.get(i));
+			if (albumArtist == null) {
+				albumArtist = new Artist(albumArtists[i]);
+				index.put(albumArtistUUIDs.get(i), albumArtist);
 			} else
-				r.name = albumArtists[i];
-			r.uuid = albumArtistUUIDs.get(i);
-			a.albumArtists.add(r);
-			r.albums.add(a);
+				albumArtist.name = albumArtists[i];
+			albumArtist.uuid = albumArtistUUIDs.get(i);
+			album.albumArtists.add(albumArtist);
+			albumArtist.albums.add(album);
 		}
 
 		if (pb != null)
