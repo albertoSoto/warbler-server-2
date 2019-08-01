@@ -1,7 +1,6 @@
 package com.trao1011.warbler.database;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -67,20 +66,24 @@ public class MediaDatabase {
 				pb.step();
 			return;
 		}
-
+		
 		String trackUUID, albumUUID;
 		List<String> artistUUIDs, albumArtistUUIDs;
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_TRACK_ID))
 			trackUUID = atag.get(Attribute.MUSICBRAINZ_TRACK_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
+		else if (atag.containsKey(Attribute.ACOUSTID_ID))
+			trackUUID = atag.get(Attribute.ACOUSTID_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
 		else
 			trackUUID = DataUtilities.SHA256File(media.toFile()).substring(4, 4 + 32);
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_ID))
 			albumUUID = atag.get(Attribute.MUSICBRAINZ_RELEASE_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
+		else if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_GROUP_ID))
+			albumUUID = atag.get(Attribute.MUSICBRAINZ_RELEASE_GROUP_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
 		else
 			albumUUID = DataUtilities.SHA256(atag.get(Attribute.ALBUM) + atag.get(Attribute.ALBUM_ARTIST))
-							.substring(4, 4 + 36);
+							.substring(4, 4 + 32);
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_ARTIST_ID))
 			artistUUIDs = Arrays.stream(atag.get(Attribute.MUSICBRAINZ_ARTIST_ID).toLowerCase().split(",|;|/"))
@@ -90,7 +93,7 @@ public class MediaDatabase {
 		else
 			artistUUIDs = Arrays.stream(atag.get(Attribute.ARTISTS, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 36))
+					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
 					.collect(Collectors.toList());
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_ARTIST_ID))
@@ -101,7 +104,7 @@ public class MediaDatabase {
 		else
 			albumArtistUUIDs = Arrays.stream(atag.get(Attribute.ALBUM_ARTIST, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 36))
+					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
 					.collect(Collectors.toList());
 
 		Track track = (Track) index.get(trackUUID);
@@ -122,14 +125,13 @@ public class MediaDatabase {
 		Album album = (Album) index.get(albumUUID);
 		if (album == null) {
 			album = new Album();
+			album.coverart = findBestCoverart(media.getParent());
+			album.title = atag.get(Attribute.ALBUM);
+			album.artistRepr = atag.get(Attribute.ALBUM_ARTIST);
+			album.uuid = albumUUID;
+			album.setDate(atag.get(Attribute.DATE));
 			index.put(albumUUID, album);
 		}
-		album.coverart = findBestCoverart(media.getParent());
-		album.title = atag.get(Attribute.ALBUM);
-		album.artistRepr = atag.get(Attribute.ALBUM_ARTIST);
-		album.uuid = albumUUID;
-		album.setDate(atag.get(Attribute.DATE));
-
 		track.album = album;
 		album.tracks.add(track);
 
@@ -140,22 +142,23 @@ public class MediaDatabase {
 			Artist trackArtist = (Artist) index.get(artistUUIDs.get(i));
 			if (trackArtist == null) {
 				trackArtist = new Artist(trackArtists[i]);
+				trackArtist.uuid = artistUUIDs.get(i);
+				trackArtist.tracks.add(track);
+				trackArtist.appearances.add(album);
 				index.put(artistUUIDs.get(i), trackArtist);
 			} else
 				trackArtist.name = trackArtists[i];
-			trackArtist.uuid = artistUUIDs.get(i);
-			trackArtist.tracks.add(track);
-			trackArtist.appearances.add(album);
 			track.artists.add(trackArtist);
 		}
+		
 		for (int i = 0; i < albumArtists.length; i++) {
 			Artist albumArtist = (Artist) index.get(albumArtistUUIDs.get(i));
 			if (albumArtist == null) {
 				albumArtist = new Artist(albumArtists[i]);
+				albumArtist.uuid = albumArtistUUIDs.get(i);
 				index.put(albumArtistUUIDs.get(i), albumArtist);
 			} else
 				albumArtist.name = albumArtists[i];
-			albumArtist.uuid = albumArtistUUIDs.get(i);
 			album.albumArtists.add(albumArtist);
 			albumArtist.albums.add(album);
 		}

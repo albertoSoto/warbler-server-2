@@ -8,6 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class DataUtilities {
+	private static MessageDigest sha256 = null;
+	
 	public static int tryParseInteger(String s, int defaultValue) {
 		if (s == null)
 			return defaultValue;
@@ -23,16 +25,18 @@ public class DataUtilities {
 	}
 
 	private static MessageDigest getSHA256Digest() {
-		MessageDigest digest = null;
-
-		try {
-			digest = MessageDigest.getInstance("SHA-256");
-		} catch (NoSuchAlgorithmException e) {
-			// We can do this because SHA-256 is supposed to be packaged with the Java runtime.
-			e.printStackTrace();
-			System.exit(1);
+		if (sha256 == null) {
+			try {
+				sha256 = MessageDigest.getInstance("SHA-256");
+			} catch (NoSuchAlgorithmException e) {
+				// We can do this because SHA-256 is supposed to be packaged with the Java runtime.
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
-		return digest;
+		
+		sha256.reset();
+		return sha256;
 	}
 
 	private static String bytesToHex(byte[] bytes) {
@@ -51,7 +55,7 @@ public class DataUtilities {
 
 	public static String SHA256File(final File f) {
 		MessageDigest digest = getSHA256Digest();
-		byte[] chunk = new byte[16384];
+		byte[] chunk = new byte[1 << 22];
 		int chunkLen;
 
 		try (FileInputStream fis = new FileInputStream(f)) {
