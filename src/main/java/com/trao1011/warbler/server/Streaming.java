@@ -104,7 +104,7 @@ public class Streaming {
 			transcodeQuality = determineTranscodeQuality(ctx.queryParam("q").iterator().next());
 		}
 
-		System.out.println("Quality: " + transcodeQuality);
+		ctx.response().setStatusCode(206);
 		if (transcodeQuality == -1) {
 			// Don't transcode.
 			String guessedType =  URLConnection.guessContentTypeFromName(track.getLocation().toString());
@@ -113,8 +113,7 @@ public class Streaming {
 			ctx.response().putHeader("Content-Type", "audio/mpeg").sendFile(transcoded.getAbsolutePath());
 		} else {
 			transcoded.deleteOnExit();
-			ctx.response().setChunked(true);
-
+			
 			Transcoder transcoder = null;
 			try {
 				transcoder = Transcoder.create(ctx.vertx(), track.getLocation().toFile(), transcodeQuality);
@@ -130,6 +129,10 @@ public class Streaming {
 				return;
 			}
 
+			ctx.response().setStatusCode(206)
+				.putHeader("Accept-Ranges", "bytes")
+				.putHeader("Content-Type", "audio/mpeg")
+				.setChunked(true);
 			MessageConsumer<Buffer> consumer = ctx.vertx().eventBus().consumer(transcoder.getHandleName());
 			consumer.handler(new TranscoderReader(consumer, transcoded, ctx));
 			new Thread(transcoder).start();
