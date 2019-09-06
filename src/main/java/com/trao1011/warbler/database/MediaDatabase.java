@@ -143,11 +143,12 @@ public class MediaDatabase {
 			if (trackArtist == null) {
 				trackArtist = new Artist(trackArtists[i]);
 				trackArtist.uuid = artistUUIDs.get(i);
-				trackArtist.tracks.add(track);
-				trackArtist.appearances.add(album);
 				index.put(artistUUIDs.get(i), trackArtist);
 			} else
 				trackArtist.name = trackArtists[i];
+
+			trackArtist.tracks.add(track);
+			trackArtist.appearances.add(album);
 			track.artists.add(trackArtist);
 		}
 		
