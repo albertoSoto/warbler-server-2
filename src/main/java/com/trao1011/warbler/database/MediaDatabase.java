@@ -141,11 +141,11 @@ public class MediaDatabase {
 		for (int i = 0; i < trackArtists.length; i++) {
 			Artist trackArtist = (Artist) index.get(artistUUIDs.get(i));
 			if (trackArtist == null) {
-				trackArtist = new Artist(trackArtists[i]);
+				trackArtist = new Artist(trackArtists[i].trim());
 				trackArtist.uuid = artistUUIDs.get(i);
 				index.put(artistUUIDs.get(i), trackArtist);
 			} else
-				trackArtist.name = trackArtists[i];
+				trackArtist.name = trackArtists[i].trim();
 
 			trackArtist.tracks.add(track);
 			trackArtist.appearances.add(album);
@@ -155,11 +155,11 @@ public class MediaDatabase {
 		for (int i = 0; i < albumArtists.length; i++) {
 			Artist albumArtist = (Artist) index.get(albumArtistUUIDs.get(i));
 			if (albumArtist == null) {
-				albumArtist = new Artist(albumArtists[i]);
+				albumArtist = new Artist(albumArtists[i].trim());
 				albumArtist.uuid = albumArtistUUIDs.get(i);
 				index.put(albumArtistUUIDs.get(i), albumArtist);
 			} else
-				albumArtist.name = albumArtists[i];
+				albumArtist.name = albumArtists[i].trim();
 			album.albumArtists.add(albumArtist);
 			albumArtist.albums.add(album);
 		}
