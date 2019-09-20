@@ -9,8 +9,11 @@ import java.util.stream.*;
 import com.trao1011.warbler.database.AudioTag.Attribute;
 
 import me.tongfei.progressbar.ProgressBar;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.model.BoundExtractedResult;
 
 public class MediaDatabase {
+	public static final int SEARCH_FUZZINESS = 50;
 	private Map<String, MediaDatabaseEntry> index = new HashMap<String, MediaDatabaseEntry>();
 	private Map<String, String> nameKeyCache = new HashMap<String, String>();
 
@@ -208,6 +211,11 @@ public class MediaDatabase {
 		} else if (media.toFile().isFile()) {
 			scan(media);
 		}
+	}
+	
+	public List<SearchResult> searchDB(String searchQuery) {
+		List<BoundExtractedResult<MediaDatabaseEntry>> match = FuzzySearch.extractSorted(searchQuery, index.values(), e -> e.getSearchValue(), SEARCH_FUZZINESS);
+		return match.stream().map(r -> new SearchResult(r.getReferent(), r.getScore())).collect(Collectors.toList());
 	}
 
 	static Path findBestCoverart(final Path containingDirectory) {

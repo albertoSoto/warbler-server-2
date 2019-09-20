@@ -4,10 +4,11 @@ import java.io.*;
 import java.net.URLConnection;
 import java.nio.file.*;
 import java.security.*;
-import java.util.Base64;
+import java.util.*;
 
 import com.trao1011.warbler.database.Album;
 import com.trao1011.warbler.database.MediaDatabase;
+import com.trao1011.warbler.database.SearchResult;
 import com.trao1011.warbler.database.Track;
 import com.trao1011.warbler.transcoder.Transcoder;
 import com.trao1011.warbler.transcoder.TranscoderReader;
@@ -15,6 +16,8 @@ import com.trao1011.warbler.transcoder.TranscoderReader;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 
 public class Streaming {
@@ -81,6 +84,39 @@ public class Streaming {
 		} else {
 			ctx.response().setStatusCode(404).end("Not Found");
 		}
+	},
+			
+	search = ctx -> {		
+		if (!Identity.isAuthenticated(ctx)) {
+			ctx.response().setStatusCode(403).end("Forbidden");
+			return;
+		}
+		
+		List<SearchResult> results = MediaDatabase.getInstance().searchDB(ctx.request().getParam("q"));
+		JsonObject root = new JsonObject();
+		root.put("artists", new JsonArray());
+		root.put("albums", new JsonArray());
+		root.put("tracks", new JsonArray());
+		root.put("playlists", new JsonArray());
+		for (SearchResult r : results) {
+			switch (r.uuid().charAt(0)) {
+			case 'a':
+				root.getJsonArray("albums").add(new JsonArray(r.toString()));
+				break;
+			case 'p':
+				root.getJsonArray("playlists").add(new JsonArray(r.toString()));
+				break;
+			case 'r':
+				root.getJsonArray("artists").add(new JsonArray(r.toString()));
+				break;
+			case 't':
+				root.getJsonArray("tracks").add(new JsonArray(r.toString()));
+				break;
+			default: break;
+			}
+		}
+		
+		ctx.response().setStatusCode(200).putHeader("Content-type", "application/json").end(root.encode());		
 	},
 
 	streamAudio = ctx -> {

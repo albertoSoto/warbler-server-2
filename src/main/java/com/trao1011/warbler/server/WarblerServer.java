@@ -71,6 +71,7 @@ public class WarblerServer {
 
 		router.get("/stream/:id").handler(Streaming.streamAudio);
 		router.get("/artwork/:id").handler(Streaming.albumArtwork);
+		router.get("/search").handler(Streaming.search);
 
 		router.route("/graphql").handler(GraphQLHandler.create(new GraphDB().ql()));
 

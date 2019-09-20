@@ -47,4 +47,9 @@ public class Track extends MediaDatabaseEntry implements Comparable<Track> {
 
 		return location.compareTo(arg0.location);
 	}
+
+	@Override
+	public String getSearchValue() {
+		return title;
+	}
 }

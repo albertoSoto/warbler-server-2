@@ -49,7 +49,7 @@ public class UserDatabase {
 		return udb;
 	}
 
-	Map<Long, Playlist> playlists = new HashMap<Long, Playlist>();
+	Map<String, Playlist> playlists = new HashMap<String, Playlist>();
 	Map<Long, User> users = new HashMap<Long, User>();
 	SQLClient client;
 
@@ -88,19 +88,18 @@ public class UserDatabase {
 
 		// Get all playlists.
 		try (java.sql.Connection conn = DriverManager.getConnection(jdbcConfig.getString("url"))) {
-			String sql = "SELECT `ID`, `NAME`, `OWNER`, `SHARED`, `TRACKS` FROM PLAYLISTS";
+			String sql = "SELECT `ID`, `UUID`, `NAME`, `OWNER`, `SHARED`, `TRACKS` FROM PLAYLISTS";
 			java.sql.Statement stmt = conn.createStatement();
 			java.sql.ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Playlist p = new Playlist(rs.getString(2));
-				p.author = users.get(rs.getLong(3));
+				Playlist p = new Playlist(rs.getString(3), users.get(rs.getLong(4)), rs.getString(2));
 				p.author.playlists.add(p);
 				p.id = rs.getLong(1);
-				p.shared = rs.getBoolean(4);
-				p.tracks = Arrays.stream(rs.getString(5).split(";"))
+				p.shared = rs.getBoolean(5);
+				p.tracks = Arrays.stream(rs.getString(6).split(";"))
 						.map(trackUUID -> (Track) MediaDatabase.getInstance().get(trackUUID, Track.class))
 						.collect(Collectors.toList());
-				playlists.put(p.id, p);
+				playlists.put(p.uuid, p);
 			}
 
 			stmt.close();
@@ -276,11 +275,11 @@ public class UserDatabase {
 			params.add(author.uid);
 			client.updateWithParams(sql, params, res -> {
 				if (res.succeeded()) {
-					Playlist pl = new Playlist(name);
+					Playlist pl = new Playlist(name, author);
 					pl.author = author;
 					pl.id = res.result().getKeys().getLong(0);
 					pl.author.playlists.add(pl);
-					playlists.put(pl.id, pl);
+					playlists.put(pl.uuid, pl);
 					promise.complete(pl);
 				} else
 					promise.completeExceptionally(res.cause());
@@ -289,16 +288,16 @@ public class UserDatabase {
 		return promise;
 	}
 
-	CompletableFuture<Playlist> setPlaylistName(long id, String name) {
+	CompletableFuture<Playlist> setPlaylistName(String uuid, String name) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
-		String sql = "UPDATE `PLAYLISTS` SET `NAME` = ? WHERE `ID` = ?";
+		String sql = "UPDATE `PLAYLISTS` SET `NAME` = ? WHERE `UUID` = ?";
 		JsonArray params = new JsonArray();
 		params.add(name);
-		params.add(id);
+		params.add(uuid);
 		client.updateWithParams(sql, params, res -> {
 			if (res.succeeded()) {
 				if (res.result().getUpdated() > 0) {
-					Playlist pl = playlists.get(id);
+					Playlist pl = playlists.get(uuid);
 					pl.name = name;
 					promise.complete(pl);
 				} else
@@ -309,16 +308,16 @@ public class UserDatabase {
 		return promise;
 	}
 
-	CompletableFuture<Playlist> setPlaylistShared(long id, boolean shared) {
+	CompletableFuture<Playlist> setPlaylistShared(String uuid, boolean shared) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
-		String sql = "UPDATE `PLAYLISTS` SET `SHARED` = ? WHERE `ID` = ?";
+		String sql = "UPDATE `PLAYLISTS` SET `SHARED` = ? WHERE `UUID` = ?";
 		JsonArray params = new JsonArray();
 		params.add(shared);
-		params.add(id);
+		params.add(uuid);
 		client.updateWithParams(sql, params, res -> {
 			if (res.succeeded()) {
 				if (res.result().getUpdated() > 0) {
-					Playlist pl = playlists.get(id);
+					Playlist pl = playlists.get(uuid);
 					pl.shared = shared;
 					promise.complete(pl);
 				} else
@@ -329,16 +328,16 @@ public class UserDatabase {
 		return promise;
 	}
 
-	CompletableFuture<Playlist> setPlaylistTracks(long id, String tracks) {
+	CompletableFuture<Playlist> setPlaylistTracks(String uuid, String tracks) {
 		CompletableFuture<Playlist> promise = new CompletableFuture<Playlist>();
-		String sql = "UPDATE `PLAYLISTS` SET `TRACKS` = ? WHERE `ID` = ?";
+		String sql = "UPDATE `PLAYLISTS` SET `TRACKS` = ? WHERE `UUID` = ?";
 		JsonArray params = new JsonArray();
 		params.add(tracks);
-		params.add(id);
+		params.add(uuid);
 		client.updateWithParams(sql, params, res -> {
 			if (res.succeeded()) {
 				if (res.result().getUpdated() > 0) {
-					Playlist pl = playlists.get(id);
+					Playlist pl = playlists.get(uuid);
 					pl.tracks = Arrays.stream(tracks.split(";"))
 							.filter(s -> s.length() > 0)
 							.map(s -> (Track) MediaDatabase.getInstance().get(s, Track.class))
@@ -352,15 +351,15 @@ public class UserDatabase {
 		return promise;
 	}
 
-	CompletableFuture<Boolean> removePlaylist(long id) {
+	CompletableFuture<Boolean> removePlaylist(String uuid) {
 		CompletableFuture<Boolean> promise = new CompletableFuture<Boolean>();
-		String sql = "DELETE FROM `PLAYLISTS` WHERE `ID` = ?";
+		String sql = "DELETE FROM `PLAYLISTS` WHERE `UUID` = ?";
 		JsonArray params = new JsonArray();
-		params.add(id);
+		params.add(uuid);
 		client.updateWithParams(sql, params, res -> {
 			if (res.succeeded()) {
 				if (res.result().getUpdated() > 0)
-					playlists.remove(id);
+					playlists.remove(uuid);
 				promise.complete(res.result().getUpdated() > 0);
 			} else
 				promise.completeExceptionally(res.cause());

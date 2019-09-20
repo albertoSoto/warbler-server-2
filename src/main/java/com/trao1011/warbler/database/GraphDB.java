@@ -70,7 +70,7 @@ public class GraphDB {
 			.dataFetcher("artist", env -> MediaDatabase.getInstance()
 					.get(env.getArgument("id"), Artist.class))
 			.dataFetcher("playlist", env -> UserDatabase.getInstance()
-					.playlists.get(((Number) env.getArgument("id")).longValue()))
+					.playlists.get(env.getArgument("uuid")))
 			.dataFetcher("user", env -> UserDatabase.getInstance()
 					.users.get(((Number) env.getArgument("id")).longValue()))
 			.dataFetcher("currentUser", env -> currentUser(env)),
@@ -117,16 +117,16 @@ public class GraphDB {
 			.dataFetcher("createPlaylist", env -> currentUserAuthorized(env, 1) ?
 					UserDatabase.getInstance().createPlaylist(env.getArgument("name"), currentUser(env)) : null)
 			.dataFetcher("setPlaylistName", env -> currentUserOwnsPlaylist(env) ?
-					UserDatabase.getInstance().setPlaylistName(((Number) env.getArgument("id")).longValue(),
+					UserDatabase.getInstance().setPlaylistName(env.getArgument("uuid"),
 							env.getArgument("name")) : null)
 			.dataFetcher("setPlaylistShared", env -> currentUserOwnsPlaylist(env) ?
-					UserDatabase.getInstance().setPlaylistShared(((Number) env.getArgument("id")).longValue(),
+					UserDatabase.getInstance().setPlaylistShared(env.getArgument("uuid"),
 							env.getArgument("shared")) : null)
 			.dataFetcher("setPlaylistTracks", env -> currentUserOwnsPlaylist(env) ?
-					UserDatabase.getInstance().setPlaylistTracks(((Number) env.getArgument("id")).longValue(),
+					UserDatabase.getInstance().setPlaylistTracks(env.getArgument("uuid"),
 							env.getArgument("shared")) : null)
 			.dataFetcher("removePlaylist", env -> currentUserOwnsPlaylist(env) ?
-					UserDatabase.getInstance().removePlaylist(((Number) env.getArgument("id")).longValue()) : false);
+					UserDatabase.getInstance().removePlaylist(env.getArgument("uuid")) : false);
 
 	private static RuntimeWiring generateRuntimeWiring() {
 		return RuntimeWiring.newRuntimeWiring()

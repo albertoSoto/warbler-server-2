@@ -29,4 +29,9 @@ public class Artist extends MediaDatabaseEntry implements Comparable<Artist> {
 	public int compareTo(Artist o) {
 		return name.compareToIgnoreCase(o.name);
 	}
+
+	@Override
+	public String getSearchValue() {
+		return name;
+	}
 }

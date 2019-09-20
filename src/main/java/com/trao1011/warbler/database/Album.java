@@ -59,4 +59,9 @@ public class Album extends MediaDatabaseEntry implements Comparable<Album> {
 
 		return title.compareToIgnoreCase(o.title);
 	}
+	
+	@Override
+	public String getSearchValue() {
+		return title;
+	}
 }
