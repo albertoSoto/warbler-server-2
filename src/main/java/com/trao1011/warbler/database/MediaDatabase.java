@@ -76,6 +76,7 @@ public class MediaDatabase {
 			trackUUID = atag.get(Attribute.ACOUSTID_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
 		else
 			trackUUID = DataUtilities.SHA256File(media.toFile()).substring(4, 4 + 32);
+		trackUUID = "t" + trackUUID;
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_ID))
 			albumUUID = atag.get(Attribute.MUSICBRAINZ_RELEASE_ID).toLowerCase().replaceAll("[^0-9a-f]", "");
@@ -84,27 +85,28 @@ public class MediaDatabase {
 		else
 			albumUUID = DataUtilities.SHA256(atag.get(Attribute.ALBUM) + atag.get(Attribute.ALBUM_ARTIST))
 							.substring(4, 4 + 32);
+		albumUUID = "a" + albumUUID;
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_ARTIST_ID))
 			artistUUIDs = Arrays.stream(atag.get(Attribute.MUSICBRAINZ_ARTIST_ID).toLowerCase().split(",|;|/"))
 					.map(String::trim)
-					.map(s -> s.replaceAll("[^0-9a-f]", ""))
+					.map(s -> "r" + s.replaceAll("[^0-9a-f]", ""))
 					.collect(Collectors.toList());
 		else
 			artistUUIDs = Arrays.stream(atag.get(Attribute.ARTISTS, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
+					.map(DataUtilities::SHA256).map(s -> "r" + s.substring(4, 4 + 32))
 					.collect(Collectors.toList());
 
 		if (atag.containsKey(Attribute.MUSICBRAINZ_RELEASE_ARTIST_ID))
 			albumArtistUUIDs = Arrays.stream(atag.get(Attribute.MUSICBRAINZ_RELEASE_ARTIST_ID).toLowerCase().split(",|;|/"))
 					.map(String::trim)
-					.map(s -> s.replaceAll("[^0-9a-f]", ""))
+					.map(s -> "r" + s.replaceAll("[^0-9a-f]", ""))
 					.collect(Collectors.toList());
 		else
 			albumArtistUUIDs = Arrays.stream(atag.get(Attribute.ALBUM_ARTIST, Attribute.ARTIST).split(",|;|/"))
 					.map(String::trim)
-					.map(DataUtilities::SHA256).map(s -> s.substring(4, 4 + 32))
+					.map(DataUtilities::SHA256).map(s -> "r" + s.substring(4, 4 + 32))
 					.collect(Collectors.toList());
 
 		Track track = (Track) index.get(trackUUID);
